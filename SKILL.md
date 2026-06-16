@@ -61,6 +61,8 @@ project_root/
 Scan the entire codebase and produce a report:
 - Every misplaced file → its target path
 - Every file already correct → mark ✅
+- Scan all HTML templates for `{% extends %}` and `{% include %}` tags — flag
+  every cross-reference that will need updating (they'll need the `app_name/` prefix)
 - Do NOT move anything yet
 
 ## Step 2 — Reorganize
@@ -74,6 +76,9 @@ Move files according to these rules:
   everything so existing references keep working
 - If unsure where a file belongs → move to `utils/` and flag it in Step 4
 - Never delete any file
+- **After moving templates, scan each moved `.html` file for `{% extends %}` and
+  `{% include %}` tags. Add the `app_name/` prefix to every template name
+  referenced in those tags (e.g. `{% extends "app_name/base.html" %}`).**
 
 ## Step 3 — Fix imports
 
@@ -82,12 +87,15 @@ After all moves:
 2. Fix view references in both project-level and app-level `urls.py`
 3. Fix `INSTALLED_APPS` and any hardcoded paths in `settings.py`
 4. Ensure `TEMPLATES[0]['DIRS']` points to `templates/` at project root
+5. Ensure `STATICFILES_DIRS` points to the root-level `static/` directory
+   (not `app_name/static/`)
 
 ## Step 4 — Report
 
 Produce a summary:
 - Every moved file: old path → new path
 - Every fixed import: old line → new line
+- Every template `{% extends %}` / `{% include %}` fix: old → new
 - Flagged uncertain files with explanation
 
 **Do NOT run the server or execute migrations.**
